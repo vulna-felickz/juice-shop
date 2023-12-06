@@ -36,3 +36,5 @@ jobs:
           echo "Number of alerts ($alert_count) exceeded the baseline ($baseline)."
           exit 1
         fi
+      env:
+        GH_TOKEN: ${{ github.token }}
