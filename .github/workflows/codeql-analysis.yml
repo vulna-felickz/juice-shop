@@ -28,3 +28,11 @@ jobs:
       uses: github/codeql-action/autobuild@v1
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
+    - name: Check CodeQL alerts
+      run: |
+        alert_count=$(gh api repos/${{ github.repository_owner }}/${{ github.repository }}/code-scanning/alerts?state=open&ref=${{ github.ref }} --paginate | jq '. | length')
+        baseline=10
+        if (( alert_count > baseline )); then
+          echo "Number of alerts ($alert_count) exceeded the baseline ($baseline)."
+          exit 1
+        fi
