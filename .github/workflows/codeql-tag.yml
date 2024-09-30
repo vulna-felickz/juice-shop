@@ -97,11 +97,11 @@ jobs:
       with:
         category: "/language:${{matrix.language}}"
 
-    - name: Fetch default branch
-      id: default_branch
-      run: |
-        DEFAULT_BRANCH=$(gh api /repos/${{ github.repository }} | jq -r '"refs/heads/\(.default_branch)"')
-        echo "DEFAULT_BRANCH=$DEFAULT_BRANCH" >> $GITHUB_ENV
+    # - name: Fetch default branch
+    #   id: default_branch
+    #   run: |
+    #     DEFAULT_BRANCH=$(gh api /repos/${{ github.repository }} | jq -r '"refs/heads/\(.default_branch)"')
+    #     echo "DEFAULT_BRANCH=$DEFAULT_BRANCH" >> $GITHUB_ENV
 
     # - name: Upload against default branch
     #   uses: github/codeql-action/upload-sarif@v3
@@ -110,12 +110,15 @@ jobs:
     #     #sha: ${{ github.sha }} - this should match if performing trunk based development/tagging no need to specify unless we want to gaurd explicitly via git commands
 
     - name: CodeQL results upload
-      run: |       
+      run: |
+        DefaultBranch=$(gh api /repos/${{ github.repository }} | jq -r '"refs/heads/\(.default_branch)"')
+        echo "Default Branch: $DefaultBranch"
+        codeql resolve languages --extractor-include-aliases --format=betterjson | jq -r '.aliases["${{ matrix.language }}"] // "${{ matrix.language }}"'
         lang=$(codeql resolve languages --extractor-include-aliases --format=betterjson | jq -r '.aliases["${{ matrix.language }}"] // "${{ matrix.language }}"')
         echo "Language variable is set to: $lang"
         gh extensions install github/gh-codeql
         gh codeql github upload-results \
           --sarif="${{ steps.analyze.outputs.sarif-output }}/$lang.sarif" \
           --repository=${{ github.repository }} \
-          --ref=${{ env.DEFAULT_BRANCH }} \
+          --ref="$DefaultBranch" \
           --commit=${{ github.sha }}
