@@ -109,11 +109,11 @@ jobs:
     #     #sha: ${{ github.sha }} - this should match if performing trunk based development/tagging no need to specify unless we want to gaurd explicitly via git commands
 
     - name: CodeQL results upload
-      run: |
+      run: |        
         defaultbranch=$(gh api /repos/${{ github.repository }} | jq -r '"refs/heads/\(.default_branch)"')
+        gh extensions install github/gh-codeql
         lang=$(gh codeql resolve languages --extractor-include-aliases --format=betterjson | jq -r '.aliases["${{ matrix.language }}"] // "${{ matrix.language }}"')
         echo "Branch: $defaultbranch,  language: $lang"
-        gh extensions install github/gh-codeql
         gh codeql github upload-results \
           --sarif="${{ steps.analyze.outputs.sarif-output }}/$lang.sarif" \
           --repository="${{ github.repository }}" \
