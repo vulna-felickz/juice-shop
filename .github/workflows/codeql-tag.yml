@@ -92,6 +92,7 @@ jobs:
       with:
         category: "/language:${{matrix.language}}"
 
+    # Not supported: Aborting upload: only one run of the codeql/analyze or codeql/upload-sarif actions is allowed per job per tool/category. The easiest fix is to specify a unique value for the `category` input. If .runs[].automationDetails.id is specified in the sarif file, that will take precedence over your configured `category`. Category: (/language:javascript-typescript/) Tool: (CodeQL)
     # - name: Fetch default branch
     #   id: default_branch
     #   run: |
@@ -103,6 +104,7 @@ jobs:
     #     ref: ${{ env.DEFAULT_BRANCH }}
     #     #sha: ${{ github.sha }} - this should match if performing trunk based development/tagging no need to specify unless we want to gaurd explicitly via git commands
 
+    # Uses codeql cli tool to upload results to the default branch ref (todo - use installed version instead of using gh-codeql which is downloading new cli)
     - name: CodeQL results upload
       env:
         GH_TOKEN: ${{ github.token }}
