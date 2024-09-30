@@ -98,9 +98,17 @@ jobs:
         DEFAULT_BRANCH=$(gh api /repos/${{ github.repository }} | jq -r '"refs/heads/\(.default_branch)"')
         echo "DEFAULT_BRANCH=$DEFAULT_BRANCH" >> $GITHUB_ENV
 
-    - name: Upload against default branch
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        ref: ${{ env.DEFAULT_BRANCH }}
-        #sha: ${{ github.sha }} - this should match if performing trunk based development/tagging no need to specify unless we want to gaurd explicitly via git commands
+    # - name: Upload against default branch
+    #   uses: github/codeql-action/upload-sarif@v3
+    #   with:
+    #     ref: ${{ env.DEFAULT_BRANCH }}
+    #     #sha: ${{ github.sha }} - this should match if performing trunk based development/tagging no need to specify unless we want to gaurd explicitly via git commands
 
+    - name: CodeQL results upload
+      run: |
+        gh extensions install github/gh-codeql
+        gh codeql github upload-results \
+          --sarif=${{ steps.analyze.outputs.sarif-output }} \
+          --repository=${{ github.repository }} \
+          --ref=${{ env.DEFAULT_BRANCH }} \
+          --commit=${{ github.sha }}
