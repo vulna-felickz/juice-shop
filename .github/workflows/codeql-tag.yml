@@ -86,7 +86,21 @@ jobs:
         echo '  make release'
         exit 1
 
+    # Uploads against tag which is the current `GITHUB_REF`
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:
         category: "/language:${{matrix.language}}"
+
+    - name: Fetch default branch
+      id: default_branch
+      run: |
+        DEFAULT_BRANCH=$(gh api /repos/${{ github.repository }} | jq -r '"refs/heads/\(.default_branch)"')
+        echo "DEFAULT_BRANCH=$DEFAULT_BRANCH" >> $GITHUB_ENV
+
+    - name: Upload against default branch
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        ref: ${{ env.DEFAULT_BRANCH }}
+        #sha: ${{ github.sha }} - this should match if performing trunk based development/tagging no need to specify unless we want to gaurd explicitly via git commands
+
