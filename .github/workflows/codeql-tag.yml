@@ -110,7 +110,7 @@ jobs:
       run: |        
         defaultbranch=$(gh api /repos/${{ github.repository }} | jq -r '"refs/heads/\(.default_branch)"')
         gh extensions install github/gh-codeql
-        gh codeql resolve languages --extractor-include-aliases --format=betterjson | jq -r '.aliases["${{ matrix.language }}"] // "${{ matrix.language }}"'
+        gh codeql set-version latest        
         lang=$(gh codeql resolve languages --extractor-include-aliases --format=betterjson | jq -r '.aliases["${{ matrix.language }}"] // "${{ matrix.language }}"')
         echo "Branch: $defaultbranch,  language: $lang"
         gh codeql github upload-results \
