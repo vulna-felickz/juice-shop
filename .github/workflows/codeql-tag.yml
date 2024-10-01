@@ -108,7 +108,8 @@ jobs:
     # Uses codeql cli tool to upload results to the default branch ref (todo - use installed version instead of using gh-codeql which is downloading new cli)
     - name: CodeQL results upload
       env:
-        GH_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ github.token }}     #for gh api
+        GITHUB_TOKEN: ${{ github.token }} #for codeql github upload-results
       run: |
         CODEQL=${{ steps.init.outputs.codeql-path }}
         defaultbranch=$(gh api /repos/${{ github.repository }} | jq -r '"refs/heads/\(.default_branch)"')
