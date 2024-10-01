@@ -58,6 +58,7 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
+      id: init
       uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
@@ -108,14 +109,12 @@ jobs:
     - name: CodeQL results upload
       env:
         GH_TOKEN: ${{ github.token }}
-        GITHUB_TOKEN: ${{ github.token }}
-      run: |        
+      run: |
+        export PATH="${{ steps.init.outputs.codeql-path }}:$PATH"
         defaultbranch=$(gh api /repos/${{ github.repository }} | jq -r '"refs/heads/\(.default_branch)"')
-        gh extensions install github/gh-codeql
-        gh codeql set-version latest        
-        lang=$(gh codeql resolve languages --extractor-include-aliases --format=betterjson | jq -r '.aliases["${{ matrix.language }}"] // "${{ matrix.language }}"')
+        lang=$(codeql resolve languages --extractor-include-aliases --format=betterjson | jq -r '.aliases["${{ matrix.language }}"] // "${{ matrix.language }}"')
         echo "Branch: $defaultbranch,  language: $lang"
-        gh codeql github upload-results \
+        codeql github upload-results \
           --sarif="${{ steps.analyze.outputs.sarif-output }}/$lang.sarif" \
           --repository="${{ github.repository }}" \
           --ref="$defaultbranch" \
