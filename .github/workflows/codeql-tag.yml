@@ -123,7 +123,7 @@ jobs:
                     .automationDetails += {id: $id}
                 end
             )
-        "$sarifFilePath" > "${sarifFilePath}.tmp" && mv "${sarifFilePath}.tmp" "$sarifFilePath"
+        ' "$sarifFilePath" > "${sarifFilePath}.tmp" && mv "${sarifFilePath}.tmp" "$sarifFilePath"
 
     # Uses codeql cli tool to upload results to the default branch ref
     - name: CodeQL results upload
