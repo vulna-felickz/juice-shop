@@ -42,8 +42,10 @@ jobs:
         include:
         - language: javascript-typescript
           build-mode: none
+          category: js
         - language: python
           build-mode: none
+          category: py
         # CodeQL supports the following values keywords for 'language': 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift'
         # Use `c-cpp` to analyze code written in C, C++ or both
         # Use 'java-kotlin' to analyze code written in Java, Kotlin or both
@@ -105,6 +107,24 @@ jobs:
     #     ref: ${{ env.DEFAULT_BRANCH }}
     #     #sha: ${{ github.sha }} - this should match if performing trunk based development/tagging no need to specify unless we want to gaurd explicitly via git commands
 
+    # this is just a sample to show how to programatically override
+    - name: Set SARIF Category
+      run: | 
+        # Category
+        automationId="${{ matrix.category }}"
+        sarifFilePath="${{ steps.analyze.outputs.sarif-output }}/$lang.sarif"
+        
+        # Process the SARIF file with jq and ovewrite the file with proper category
+        jq --arg id "$automationId" '
+            .runs |= map(
+                if .automationDetails.id then
+                    .automationDetails.id = $id
+                else
+                    .automationDetails += {id: $id}
+                end
+            )
+        "$sarifFilePath" > "${sarifFilePath}.tmp" && mv "${sarifFilePath}.tmp" "$sarifFilePath"
+
     # Uses codeql cli tool to upload results to the default branch ref
     - name: CodeQL results upload
       env:
@@ -119,8 +139,7 @@ jobs:
           --sarif="${{ steps.analyze.outputs.sarif-output }}/$lang.sarif" \
           --repository="${{ github.repository }}" \
           --ref="$defaultbranch" \
-          --commit=${{ github.sha }}
-
+          --commit=${{ github.sha }}        
 
     - name: Upload CodeQL Analysis
       uses: actions/upload-artifact@v3
